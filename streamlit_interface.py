@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 # Funzioni di calcolo
 
@@ -58,18 +59,6 @@ int_dew_p = round(DewPoint(int_temp, int_rel_hum), 2)
 ext_abs_hum = round(AH(ext_temp, ext_rel_hum), 2)
 ext_dew_p = round(DewPoint(ext_temp, ext_rel_hum), 2)
 
-st.title('Controllo Unità Climatizzazione')
-st.subheader('Condizioni Ambientali')
-st.write(f"Temperatura Interna: {int_temp} °C")
-st.write(f"Umidità Relativa Interna: {int_rel_hum} %")
-st.write(f"Temperatura Superficie Interna: {int_surf_temp} °C")
-st.write(f"Umidità Assoluta Interna: {int_abs_hum} g/m3")
-st.write(f"Punto di Rugiada Interno: {int_dew_p} °C")
-st.write(f"Temperatura Esterna: {ext_temp} °C")
-st.write(f"Umidità Relativa Esterna: {ext_rel_hum} %")
-st.write(f"Umidità Assoluta Esterna: {ext_abs_hum} g/m3")
-st.write(f"Punto di Rugiada Esterno: {ext_dew_p} °C")
-
 # Controlli
 condensation_check = False
 absolute_humidity_check = False
@@ -83,10 +72,6 @@ if humidity_diff >= humidity_difference_activation_threshold:
     absolute_humidity_check = True
 elif absolute_humidity_check and humidity_diff <= humidity_difference_deactivation_threshold:
     absolute_humidity_check = False
-
-st.subheader('Controlli')
-st.write(f"Rischio Condensa: {'SI' if condensation_check else 'NO'}")
-st.write(f"Possibile Ventilazione: {'SI' if absolute_humidity_check else 'NO'}")
 
 # Unità
 power_values = {
@@ -157,6 +142,82 @@ if mech_ventilation_system_active and mech_ventilation_low_temp_deactivation_thr
     mech_ventilation_system_active = False
     mech_reasons = []
 
+# Calcolo consumo minimo
+power_consumption = {
+    "Riscaldamento": (heating_system_active, power_values["Heating"]),
+    "Raffreddamento": (cooling_system_active, power_values["Cooling"]),
+    "Deumidificatore": (dehumifier_system_active, power_values["Dehumidifier"]),
+    "Ventilazione Meccanica": (mech_ventilation_system_active, power_values["Mechanical Ventilation"])
+}
+active_units = {system: power for system, (active, power) in power_consumption.items() if active}
+
+# Layout Streamlit professionale
+st.title('Sistema di Controllo Unità Climatizzazione')
+st.markdown('''---''')
+
+# Sezione: Condizioni Ambientali
+with st.expander('🌡️ **Condizioni Ambientali**', expanded=True):
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric('Temperatura Interna (°C)', f'{int_temp:.1f}')
+        st.metric('Umidità Relativa Interna (%)', f'{int_rel_hum:.1f}')
+        st.metric('Temperatura Superficie Interna (°C)', f'{int_surf_temp:.1f}')
+        st.metric('Umidità Assoluta Interna (g/m³)', f'{int_abs_hum:.2f}')
+        st.metric('Punto di Rugiada Interno (°C)', f'{int_dew_p:.2f}')
+    with col2:
+        st.metric('Temperatura Esterna (°C)', f'{ext_temp:.1f}')
+        st.metric('Umidità Relativa Esterna (%)', f'{ext_rel_hum:.1f}')
+        st.metric('Umidità Assoluta Esterna (g/m³)', f'{ext_abs_hum:.2f}')
+        st.metric('Punto di Rugiada Esterno (°C)', f'{ext_dew_p:.2f}')
+
+# Sezione: Visualizzazione grafica punti chiave
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.scatter(int_temp, int_abs_hum, color='blue', label='Interno', s=100)
+ax.scatter(ext_temp, ext_abs_hum, color='green', label='Esterno', s=100)
+ax.scatter(int_dew_p, int_abs_hum, color='red', label='Punto di Rugiada Int.', marker='x', s=100)
+ax.set_xlabel('Temperatura (°C)')
+ax.set_ylabel('Umidità Assoluta (g/m³)')
+ax.set_title('Visualizzazione Punti Chiave')
+ax.legend()
+ax.grid(True, linestyle='--', alpha=0.5)
+st.pyplot(fig)
+
+st.markdown('''---''')
+
+# Sezione: Controlli
+with st.expander('🛡️ **Controlli di Sicurezza e Comfort**', expanded=True):
+    st.write(f"**Rischio Condensa:** {'🟢 NO' if not condensation_check else '🔴 SI'}")
+    st.write(f"**Possibile Ventilazione:** {'🟢 SI' if absolute_humidity_check else '🔴 NO'}")
+
+st.markdown('''---''')
+
+# Sezione: Stato Unità
+with st.expander('⚙️ **Stato delle Unità**', expanded=True):
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write(f"**Raffreddamento:** {'🟢 ATTIVO' if cooling_system_active else '⚪ SPENTO'}")
+        if cooling_system_active:
+            st.write(f"Motivi: {', '.join(cooling_reasons)}")
+        st.write(f"**Riscaldamento:** {'🟢 ATTIVO' if heating_system_active else '⚪ SPENTO'}")
+        if heating_system_active:
+            st.write(f"Motivi: {', '.join(heating_reasons)}")
+    with col2:
+        st.write(f"**Deumidificatore:** {'🟢 ATTIVO' if dehumifier_system_active else '⚪ SPENTO'}")
+        if dehumifier_system_active:
+            st.write(f"Motivi: {', '.join(dehu_reasons)}")
+        st.write(f"**Ventilazione Meccanica:** {'🟢 ATTIVA' if mech_ventilation_system_active else '⚪ SPENTA'}")
+        if mech_ventilation_system_active:
+            st.write(f"Motivi: {', '.join(mech_reasons)}")
+
+# Sezione: Consumo Energetico
+st.markdown('''---''')
+st.subheader('🔋 Consumo Energetico Ottimale')
+if active_units:
+    lowest_power_unit = min(active_units, key=active_units.get)
+    st.success(f"L'unità attiva con il minor consumo è: **{lowest_power_unit}**  (Consumo: {active_units[lowest_power_unit]} Watt)")
+else:
+    st.info("Nessuna unità è attualmente attiva.")
+
 # Output stato unità
 st.subheader('Stato Unità')
 st.write(f"Raffreddamento: {'ATTIVO' if cooling_system_active else 'SPENTO'}")
@@ -171,17 +232,3 @@ if dehumifier_system_active:
 st.write(f"Ventilazione Meccanica: {'ATTIVA' if mech_ventilation_system_active else 'SPENTA'}")
 if mech_ventilation_system_active:
     st.write(f"Motivi: {', '.join(mech_reasons)}")
-
-# Calcolo consumo minimo
-power_consumption = {
-    "Riscaldamento": (heating_system_active, power_values["Heating"]),
-    "Raffreddamento": (cooling_system_active, power_values["Cooling"]),
-    "Deumidificatore": (dehumifier_system_active, power_values["Dehumidifier"]),
-    "Ventilazione Meccanica": (mech_ventilation_system_active, power_values["Mechanical Ventilation"])
-}
-active_units = {system: power for system, (active, power) in power_consumption.items() if active}
-if active_units:
-    lowest_power_unit = min(active_units, key=active_units.get)
-    st.success(f"L'unità attiva con il minor consumo è: {lowest_power_unit} (Consumo: {active_units[lowest_power_unit]} Watt)")
-else:
-    st.info("Nessuna unità è attualmente attiva.")
