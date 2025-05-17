@@ -185,5 +185,3 @@ if active_units:
     st.success(f"L'unità attiva con il minor consumo è: {lowest_power_unit} (Consumo: {active_units[lowest_power_unit]} Watt)")
 else:
     st.info("Nessuna unità è attualmente attiva.")
-    
-print("Stato Unità:")
