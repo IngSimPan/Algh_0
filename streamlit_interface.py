@@ -186,3 +186,4 @@ if active_units:
 else:
     st.info("Nessuna unità è attualmente attiva.")
     
+print("Stato Unità:")
