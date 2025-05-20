@@ -155,20 +155,33 @@ active_units = {system: power for system, (active, power) in power_consumption.i
 st.title('Sistema di Controllo Unità Climatizzazione')
 st.markdown('''---''')
 
-# Sezione: Condizioni Ambientali
-with st.expander('🌡️ **Condizioni Ambientali**', expanded=True):
+# Sezione: Parametri Ambientali di Input
+with st.expander('🔧 **Parametri Ambientali di Input**', expanded=True):
     col1, col2 = st.columns(2)
     with col1:
-        st.metric('Temperatura Interna (°C)', f'{int_temp:.1f}')
-        st.metric('Umidità Relativa Interna (%)', f'{int_rel_hum:.1f}')
-        st.metric('Temperatura Superficie Interna (°C)', f'{int_surf_temp:.1f}')
-        st.metric('Umidità Assoluta Interna (g/m³)', f'{int_abs_hum:.2f}')
-        st.metric('Punto di Rugiada Interno (°C)', f'{int_dew_p:.2f}')
+        st.write('**Temperatura Interna (°C):**')
+        st.info(f'{int_temp:.1f}', icon="🌡️")
+        st.write('**Temperatura Superficie Interna (°C):**')
+        st.info(f'{int_surf_temp:.1f}', icon="🧱")
     with col2:
-        st.metric('Temperatura Esterna (°C)', f'{ext_temp:.1f}')
-        st.metric('Umidità Relativa Esterna (%)', f'{ext_rel_hum:.1f}')
-        st.metric('Umidità Assoluta Esterna (g/m³)', f'{ext_abs_hum:.2f}')
-        st.metric('Punto di Rugiada Esterno (°C)', f'{ext_dew_p:.2f}')
+        st.write('**Temperatura Esterna (°C):**')
+        st.info(f'{ext_temp:.1f}', icon="🌡️")
+        st.write('**Umidità Relativa Esterna (%):**')
+        st.info(f'{ext_rel_hum:.1f}', icon="💧")
+
+# Sezione: Output Calcolati (dati che variano con input)
+with st.expander('📊 **Output Calcolati**', expanded=True):
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write('**Umidità Relativa Interna (%)**')
+        st.success(f'{int_rel_hum:.1f}', icon="💧")
+        st.write('**Umidità Assoluta Interna (g/m³)**')
+        st.success(f'{int_abs_hum:.2f}', icon="💧")
+    with col2:
+        st.write('**Punto di Rugiada Interno (°C)**')
+        st.success(f'{int_dew_p:.2f}', icon="❄️")
+        st.write('**Umidità Assoluta Esterna (g/m³)**')
+        st.success(f'{ext_abs_hum:.2f}', icon="💧")
 
 # Sezione: Visualizzazione grafica punti chiave
 fig, ax = plt.subplots(figsize=(6, 4))
@@ -209,14 +222,27 @@ with st.expander('⚙️ **Stato delle Unità**', expanded=True):
         if mech_ventilation_system_active:
             st.write(f"Motivi: {', '.join(mech_reasons)}")
 
-# Sezione: Consumo Energetico
+# Sezione: Consumo Energetico - RISULTATO CENTRALE
 st.markdown('''---''')
 st.subheader('🔋 Consumo Energetico Ottimale')
 if active_units:
     lowest_power_unit = min(active_units, key=active_units.get)
-    st.success(f"L'unità attiva con il minor consumo è: **{lowest_power_unit}**  (Consumo: {active_units[lowest_power_unit]} Watt)")
+    st.markdown(f"""
+    <div style='text-align:center; background-color:#e6ffe6; padding:2em; border-radius:20px; border: 2px solid #1a7f37; margin-bottom:2em;'>
+        <span style='font-size:2em; font-weight:bold; color:#1a7f37;'>
+            ✅ Unità attiva con minor consumo:<br> <u>{lowest_power_unit}</u>
+        </span><br>
+        <span style='font-size:1.5em;'>
+            <b>Consumo:</b> {active_units[lowest_power_unit]} Watt
+        </span>
+    </div>
+    """, unsafe_allow_html=True)
 else:
-    st.info("Nessuna unità è attualmente attiva.")
+    st.markdown("""
+    <div style='text-align:center; background-color:#fffbe6; padding:2em; border-radius:20px; border: 2px solid #e6a700; margin-bottom:2em;'>
+        <span style='font-size:1.5em; color:#e6a700;'>⚠️ Nessuna unità è attualmente attiva.</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Output stato unità
 st.subheader('Stato Unità')
