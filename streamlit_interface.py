@@ -28,30 +28,50 @@ int_surf_temp = st.sidebar.slider('Temperatura Superficie Interna (°C)', min_va
 ext_temp = st.sidebar.slider('Temperatura Esterna (°C)', min_value=-20.0, max_value=50.0, value=12.0, step=0.1)
 ext_rel_hum = st.sidebar.slider('Umidità Relativa Esterna (%)', min_value=0, max_value=100, value=45, step=1)
 
-# Celle per threshold
+# Celle per threshold con descrizione
 st.sidebar.header('Soglie di Controllo')
-condensation_activation_threshold = st.sidebar.number_input('Soglia attivazione condensa (°C)', value=2.0, step=0.1)
-condensation_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione condensa (°C)', value=4.0, step=0.1)
-humidity_difference_activation_threshold = st.sidebar.number_input('Soglia attivazione umidità assoluta (g/m3)', value=5.0, step=0.1)
-humidity_difference_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione umidità assoluta (g/m3)', value=10.0, step=0.1)
-
-cooling_temp_activation_threshold = st.sidebar.number_input('Soglia attivazione raffreddamento (°C)', value=26.0, step=0.1)
-cooling_temp_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione raffreddamento (°C)', value=20.0, step=0.1)
-cooling_humidity_activation_threshold = st.sidebar.number_input('Soglia attivazione raffreddamento umidità (%)', value=25.0, step=0.1)
-cooling_humidity_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione raffreddamento umidità (%)', value=40.0, step=0.1)
-
-heating_temp_activation_threshold = st.sidebar.number_input('Soglia attivazione riscaldamento (°C)', value=9.0, step=0.1)
-heating_temp_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione riscaldamento (°C)', value=17.0, step=0.1)
-heating_humidity_activation_threshold = st.sidebar.number_input('Soglia attivazione riscaldamento umidità (%)', value=80.0, step=0.1)
-heating_humidity_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione riscaldamento umidità (%)', value=60.0, step=0.1)
-
-dehumifier_humidity_activation_threshold = st.sidebar.number_input('Soglia attivazione deumidificatore (%)', value=80.0, step=0.1)
-dehumifier_humidity_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione deumidificatore (%)', value=60.0, step=0.1)
-
-mech_ventilation_low_temp_activation_threshold = st.sidebar.number_input('Soglia attivazione ventilazione bassa T (°C)', value=9.0, step=0.1)
-mech_ventilation_low_temp_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione ventilazione bassa T (°C)', value=13.0, step=0.1)
-mech_ventilation_high_temp_activation_threshold = st.sidebar.number_input('Soglia attivazione ventilazione alta T (°C)', value=24.0, step=0.1)
-mech_ventilation_high_temp_deactivation_threshold = st.sidebar.number_input('Soglia disattivazione ventilazione alta T (°C)', value=17.0, step=0.1)
+with st.sidebar.expander('Condensa', expanded=False):
+    condensation_activation_threshold = st.number_input('Soglia attivazione condensa (°C)', value=2.0, step=0.1)
+    st.caption('Se la differenza tra la temperatura della superficie interna e il punto di rugiada è minore o uguale a questa soglia, si attiva il controllo condensa.')
+    condensation_deactivation_threshold = st.number_input('Soglia disattivazione condensa (°C)', value=4.0, step=0.1)
+    st.caption('Se la differenza supera questa soglia, il controllo condensa si disattiva.')
+with st.sidebar.expander('Umidità Assoluta', expanded=False):
+    humidity_difference_activation_threshold = st.number_input('Soglia attivazione umidità assoluta (g/m3)', value=5.0, step=0.1)
+    st.caption('Se la differenza tra umidità assoluta interna ed esterna supera questa soglia, si suggerisce la ventilazione.')
+    humidity_difference_deactivation_threshold = st.number_input('Soglia disattivazione umidità assoluta (g/m3)', value=10.0, step=0.1)
+    st.caption('Se la differenza scende sotto questa soglia, la ventilazione non è più suggerita.')
+with st.sidebar.expander('Raffreddamento', expanded=False):
+    cooling_temp_activation_threshold = st.number_input('Soglia attivazione raffreddamento (°C)', value=26.0, step=0.1)
+    st.caption('Se la temperatura interna supera questa soglia, si attiva il raffreddamento.')
+    cooling_temp_deactivation_threshold = st.number_input('Soglia disattivazione raffreddamento (°C)', value=20.0, step=0.1)
+    st.caption('Se la temperatura interna scende sotto questa soglia, il raffreddamento si disattiva.')
+    cooling_humidity_activation_threshold = st.number_input('Soglia attivazione raffreddamento umidità (%)', value=25.0, step=0.1)
+    st.caption('Se l’umidità relativa interna scende sotto questa soglia, si attiva il raffreddamento.')
+    cooling_humidity_deactivation_threshold = st.number_input('Soglia disattivazione raffreddamento umidità (%)', value=40.0, step=0.1)
+    st.caption('Se l’umidità relativa interna supera questa soglia, il raffreddamento si disattiva.')
+with st.sidebar.expander('Riscaldamento', expanded=False):
+    heating_temp_activation_threshold = st.number_input('Soglia attivazione riscaldamento (°C)', value=9.0, step=0.1)
+    st.caption('Se la temperatura interna scende sotto questa soglia, si attiva il riscaldamento.')
+    heating_temp_deactivation_threshold = st.number_input('Soglia disattivazione riscaldamento (°C)', value=17.0, step=0.1)
+    st.caption('Se la temperatura interna supera questa soglia, il riscaldamento si disattiva.')
+    heating_humidity_activation_threshold = st.number_input('Soglia attivazione riscaldamento umidità (%)', value=80.0, step=0.1)
+    st.caption('Se l’umidità relativa interna supera questa soglia, si attiva il riscaldamento.')
+    heating_humidity_deactivation_threshold = st.number_input('Soglia disattivazione riscaldamento umidità (%)', value=60.0, step=0.1)
+    st.caption('Se l’umidità relativa interna scende sotto questa soglia, il riscaldamento si disattiva.')
+with st.sidebar.expander('Deumidificatore', expanded=False):
+    dehumifier_humidity_activation_threshold = st.number_input('Soglia attivazione deumidificatore (%)', value=80.0, step=0.1)
+    st.caption('Se l’umidità relativa interna supera questa soglia, si attiva il deumidificatore.')
+    dehumifier_humidity_deactivation_threshold = st.number_input('Soglia disattivazione deumidificatore (%)', value=60.0, step=0.1)
+    st.caption('Se l’umidità relativa interna scende sotto questa soglia, il deumidificatore si disattiva.')
+with st.sidebar.expander('Ventilazione Meccanica', expanded=False):
+    mech_ventilation_low_temp_activation_threshold = st.number_input('Soglia attivazione ventilazione bassa T (°C)', value=9.0, step=0.1)
+    st.caption('Se la temperatura interna è bassa e quella esterna è alta, si attiva la ventilazione.')
+    mech_ventilation_low_temp_deactivation_threshold = st.number_input('Soglia disattivazione ventilazione bassa T (°C)', value=13.0, step=0.1)
+    st.caption('Se la temperatura interna sale sopra questa soglia, la ventilazione si disattiva.')
+    mech_ventilation_high_temp_activation_threshold = st.number_input('Soglia attivazione ventilazione alta T (°C)', value=24.0, step=0.1)
+    st.caption('Se la temperatura interna è alta e quella esterna è bassa, si attiva la ventilazione.')
+    mech_ventilation_high_temp_deactivation_threshold = st.number_input('Soglia disattivazione ventilazione alta T (°C)', value=17.0, step=0.1)
+    st.caption('Se la temperatura interna scende sotto questa soglia, la ventilazione si disattiva.')
 
 # Calcoli principali
 int_abs_hum = round(AH(int_temp, int_rel_hum), 2)
@@ -185,14 +205,20 @@ with st.expander('📊 **Output Calcolati**', expanded=True):
 
 # Sezione: Visualizzazione grafica punti chiave
 fig, ax = plt.subplots(figsize=(6, 4))
-ax.scatter(int_temp, int_abs_hum, color='blue', label='Interno', s=100)
-ax.scatter(ext_temp, ext_abs_hum, color='green', label='Esterno', s=100)
-ax.scatter(int_dew_p, int_abs_hum, color='red', label='Punto di Rugiada Int.', marker='x', s=100)
-ax.set_xlabel('Temperatura (°C)')
-ax.set_ylabel('Umidità Assoluta (g/m³)')
-ax.set_title('Visualizzazione Punti Chiave')
-ax.legend()
-ax.grid(True, linestyle='--', alpha=0.5)
+ax.set_facecolor('#23272e')
+fig.patch.set_facecolor('#23272e')
+ax.scatter(int_temp, int_abs_hum, color='#1f77b4', label='Interno', s=100)
+ax.scatter(ext_temp, ext_abs_hum, color='#2ca02c', label='Esterno', s=100)
+ax.scatter(int_dew_p, int_abs_hum, color='#d62728', label='Punto di Rugiada Int.', marker='x', s=100)
+ax.set_xlabel('Temperatura (°C)', color='white')
+ax.set_ylabel('Umidità Assoluta (g/m³)', color='white')
+ax.set_title('Visualizzazione Punti Chiave', color='white')
+ax.legend(facecolor='#23272e', edgecolor='white')
+ax.grid(True, linestyle='--', alpha=0.5, color='white')
+ax.set_xlim(-10, 40)
+ax.set_ylim(0, 30)
+ax.tick_params(axis='x', colors='white')
+ax.tick_params(axis='y', colors='white')
 st.pyplot(fig)
 
 st.markdown('''---''')
