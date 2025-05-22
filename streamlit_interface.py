@@ -203,6 +203,26 @@ with st.expander('📊 **Output Calcolati**', expanded=True):
         st.write('**Umidità Assoluta Esterna (g/m³)**')
         st.success(f'{ext_abs_hum:.2f}', icon="💧")
 
+# Sezione: Differenze chiave e confronto soglie (PRIMA DEL GRAFICO)
+st.markdown('''---''')
+col_risk1, col_risk2 = st.columns(2)
+with col_risk1:
+    diff_cond = int_surf_temp - int_dew_p
+    if diff_cond <= condensation_activation_threshold:
+        st.error(f"Δ T Superficie - T Rugiada: {diff_cond:.2f} °C  (Sotto soglia di attivazione: {condensation_activation_threshold} °C)")
+    elif diff_cond >= condensation_deactivation_threshold:
+        st.success(f"Δ T Superficie - T Rugiada: {diff_cond:.2f} °C  (Sopra soglia di disattivazione: {condensation_deactivation_threshold} °C)")
+    else:
+        st.warning(f"Δ T Superficie - T Rugiada: {diff_cond:.2f} °C  (Nel range fra le soglie)")
+with col_risk2:
+    diff_hum = int_abs_hum - ext_abs_hum
+    if diff_hum >= humidity_difference_activation_threshold:
+        st.error(f"Δ Umidità Assoluta Int-Est: {diff_hum:.2f} g/m³  (Sopra soglia di attivazione: {humidity_difference_activation_threshold} g/m³)")
+    elif diff_hum <= humidity_difference_deactivation_threshold:
+        st.success(f"Δ Umidità Assoluta Int-Est: {diff_hum:.2f} g/m³  (Sotto soglia di disattivazione: {humidity_difference_deactivation_threshold} g/m³)")
+    else:
+        st.warning(f"Δ Umidità Assoluta Int-Est: {diff_hum:.2f} g/m³  (Nel range fra le soglie)")
+
 # Sezione: Visualizzazione grafica punti chiave
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.set_facecolor('#23272e')
@@ -210,6 +230,7 @@ fig.patch.set_facecolor('#23272e')
 ax.scatter(int_temp, int_abs_hum, color='#1f77b4', label='Interno', s=100)
 ax.scatter(ext_temp, ext_abs_hum, color='#2ca02c', label='Esterno', s=100)
 ax.scatter(int_dew_p, int_abs_hum, color='#d62728', label='Punto di Rugiada Int.', marker='x', s=100)
+ax.scatter(int_surf_temp, int_abs_hum, color='#ff7f0e', label='Superficie Interna', marker='^', s=120)
 ax.set_xlabel('Temperatura (°C)', color='white')
 ax.set_ylabel('Umidità Assoluta (g/m³)', color='white')
 ax.set_title('Visualizzazione Punti Chiave', color='white')
@@ -284,23 +305,3 @@ if dehumifier_system_active:
 st.write(f"Ventilazione Meccanica: {'ATTIVA' if mech_ventilation_system_active else 'SPENTA'}")
 if mech_ventilation_system_active:
     st.write(f"Motivi: {', '.join(mech_reasons)}")
-
-# Sezione: Differenze chiave e confronto soglie
-st.markdown('''---''')
-col_risk1, col_risk2 = st.columns(2)
-with col_risk1:
-    diff_cond = int_surf_temp - int_dew_p
-    if diff_cond <= condensation_activation_threshold:
-        st.error(f"Δ T Superficie - T Rugiada: {diff_cond:.2f} °C  (Sotto soglia di attivazione: {condensation_activation_threshold} °C)")
-    elif diff_cond >= condensation_deactivation_threshold:
-        st.success(f"Δ T Superficie - T Rugiada: {diff_cond:.2f} °C  (Sopra soglia di disattivazione: {condensation_deactivation_threshold} °C)")
-    else:
-        st.warning(f"Δ T Superficie - T Rugiada: {diff_cond:.2f} °C  (Nel range fra le soglie)")
-with col_risk2:
-    diff_hum = int_abs_hum - ext_abs_hum
-    if diff_hum >= humidity_difference_activation_threshold:
-        st.error(f"Δ Umidità Assoluta Int-Est: {diff_hum:.2f} g/m³  (Sopra soglia di attivazione: {humidity_difference_activation_threshold} g/m³)")
-    elif diff_hum <= humidity_difference_deactivation_threshold:
-        st.success(f"Δ Umidità Assoluta Int-Est: {diff_hum:.2f} g/m³  (Sotto soglia di disattivazione: {humidity_difference_deactivation_threshold} g/m³)")
-    else:
-        st.warning(f"Δ Umidità Assoluta Int-Est: {diff_hum:.2f} g/m³  (Nel range fra le soglie)")
